@@ -26,18 +26,8 @@ import org.springframework.batch.core.ItemWriteListener
 import org.springframework.batch.item.ItemWriter
 import org.springframework.util.StopWatch
 
-import javax.jcr.AccessDeniedException
-import javax.jcr.InvalidItemStateException
-import javax.jcr.ItemExistsException
-import javax.jcr.Node as JcrNode
-import javax.jcr.ReferentialIntegrityException
 import javax.jcr.RepositoryException
 import javax.jcr.Session
-import javax.jcr.lock.LockException
-import javax.jcr.nodetype.ConstraintViolationException
-import javax.jcr.nodetype.NoSuchNodeTypeException
-import javax.jcr.nodetype.NodeType
-import javax.jcr.version.VersionException
 
 /**
  * A Custom ItemWriter that will write the provided Jcr Nodes to the {@link JcrNodesWriter#theSession()}
