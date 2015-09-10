@@ -26,7 +26,18 @@ import org.springframework.batch.core.ItemWriteListener
 import org.springframework.batch.item.ItemWriter
 import org.springframework.util.StopWatch
 
+import javax.jcr.AccessDeniedException
+import javax.jcr.InvalidItemStateException
+import javax.jcr.ItemExistsException
+import javax.jcr.Node as JcrNode
+import javax.jcr.ReferentialIntegrityException
+import javax.jcr.RepositoryException
 import javax.jcr.Session
+import javax.jcr.lock.LockException
+import javax.jcr.nodetype.ConstraintViolationException
+import javax.jcr.nodetype.NoSuchNodeTypeException
+import javax.jcr.nodetype.NodeType
+import javax.jcr.version.VersionException
 
 /**
  * A Custom ItemWriter that will write the provided Jcr Nodes to the {@link JcrNodesWriter#theSession()}
@@ -46,13 +57,17 @@ class JcrNodesWriter implements ItemWriter<ProtoNode>, ItemWriteListener {
 
     @Override
     void afterWrite(List nodeProtos) {
-        log.info "Saving ${nodeProtos.size()} nodes"
-        log.debug """Saving Nodes : ${(nodeProtos as List<ProtoNode>).collectMany { ProtoNode pNode ->
-            [ pNode.name , pNode.mandatoryChildNodeList.collect { it.name - pNode.name }]
-        }.flatten()}"""
-        theSession().save()
-        withStopWatch("Refreshing session: ${theSession()}") {
-            theSession().refresh(false)
+        try {
+            log.info "Saving ${nodeProtos.size()} nodes"
+            log.debug """Saving Nodes : ${(nodeProtos as List<ProtoNode>).collectMany { ProtoNode pNode ->
+                [ pNode.name , pNode.mandatoryChildNodeList.collect { it.name - pNode.name }]
+            }.flatten()}"""
+            theSession().save()
+            withStopWatch("Refreshing session: ${theSession()}") {
+                theSession().refresh(false)
+            }
+        } catch(RepositoryException e) {
+            log.error "Exception while save() / refresh() of current chunk.", e
         }
     }
 
